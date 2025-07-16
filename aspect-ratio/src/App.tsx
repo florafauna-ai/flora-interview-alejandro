@@ -3,105 +3,86 @@ import './App.css';
 
 type AspectRatio = {
   label: string;
-  value: string;
-  ratio: number;
+  value: any;
+};
+
+const handleAspectRatios = (value: any): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    if (value.includes(':')) {
+      const [width, height] = value.split(':').map(Number);
+      return width / height;
+    }
+    if (value.includes('/')) {
+      const [width, height] = value.split('/').map(Number);
+      return width / height;
+    }
+    return Number(value);
+  }
+  return 1; // fallback
 };
 
 const aspectRatios: AspectRatio[] = [
-  { label: '1:1 (Square)', value: '1:1', ratio: 1 },
-  { label: '16:9 (Widescreen)', value: '16:9', ratio: 16/9 },
-  { label: '4:3 (Standard)', value: '4:3', ratio: 4/3 },
-  { label: '3:2 (Photo)', value: '3:2', ratio: 3/2 },
-  { label: '21:9 (Ultrawide)', value: '21:9', ratio: 21/9 },
+  { label: '1:1 (Square)', value: '1' },
+  { label: '16:9 (Widescreen)', value: 1.77 },
+  { label: '4:3 (Standard)', value: '4:3' },
+  { label: '3:2 (Photo)', value: "3/2" },
+  { label: '21:9 (Ultrawide)', value: 2.33 },
 ];
 
 function App() {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>(aspectRatios[0]);
   const [dimensions, setDimensions] = useState({ width: 300, height: 300 });
-  const [isResizing, setIsResizing] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [startDimensions, setStartDimensions] = useState({ width: 0, height: 0 });
-  const [maintainAspectRatio, setMaintainAspectRatio] = useState(false);
 
   const handleRatioChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const ratio = aspectRatios.find(r => r.value === event.target.value);
+    const ratio = aspectRatios.find(r => String(r.value) === event.target.value);
     if (ratio) {
       setSelectedRatio(ratio);
+      const numericRatio = handleAspectRatios(ratio.value);
       setDimensions(prev => ({
         width: prev.width,
-        height: prev.width / ratio.ratio
+        height: prev.width / numericRatio
       }));
     }
   };
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleDrag = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     
-    setIsResizing(true);
-    setStartPos({ x: e.clientX, y: e.clientY });
-    setStartDimensions({ ...dimensions });
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = dimensions.width;
+    const startHeight = dimensions.height;
     
-    e.preventDefault();
-  }, [dimensions]);
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing) return;
+      let newWidth = Math.max(50, startWidth + deltaX);
+      let newHeight = Math.max(50, startHeight + deltaY);
 
-    const deltaX = e.clientX - startPos.x;
-    const deltaY = e.clientY - startPos.y;
-
-    let newWidth = Math.max(50, startDimensions.width + deltaX);
-    let newHeight = Math.max(50, startDimensions.height + deltaY);
-
-    if (maintainAspectRatio) {
-      const aspectRatio = selectedRatio.ratio;
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        newHeight = newWidth / aspectRatio;
-      } else {
-        newWidth = newHeight * aspectRatio;
+      if (e.shiftKey) {
+        const aspectRatio = handleAspectRatios(selectedRatio.value);
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newWidth = newHeight * aspectRatio;
+        }
       }
-    }
 
-    setDimensions({ width: newWidth, height: newHeight });
-  }, [isResizing, startPos, startDimensions, maintainAspectRatio, selectedRatio]);
+      setDimensions({ width: newWidth, height: newHeight });
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Shift') {
-      setMaintainAspectRatio(e.shiftKey);
-    }
-  }, []);
-
-  const handleKeyUp = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Shift') {
-      setMaintainAspectRatio(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
+    const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isResizing, handleMouseMove, handleMouseUp]);
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [handleKeyDown, handleKeyUp]);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    e.preventDefault();
+  }, [dimensions, selectedRatio]);
 
   return (
     <div className="App">
@@ -130,7 +111,7 @@ function App() {
         >
           <div 
             className="resize-handle"
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleDrag}
           />
         </div>
       </div>
