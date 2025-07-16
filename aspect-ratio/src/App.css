@@ -1,0 +1,76 @@
+.App {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.controls {
+  margin-bottom: 20px;
+}
+
+.controls label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.controls select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  margin: 20px 0;
+}
+
+.blue-div {
+  background-color: #007bff;
+  position: relative;
+  border: 2px solid #0056b3;
+  border-radius: 8px;
+  min-width: 50px;
+  min-height: 50px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #0056b3;
+  cursor: se-resize;
+  border-radius: 0 0 8px 0;
+}
+
+.resize-handle:hover {
+  background-color: #004494;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-bottom: 8px solid white;
+}
+
+.instructions {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+
+.instructions p {
+  margin: 5px 0;
+  font-size: 14px;
+}
