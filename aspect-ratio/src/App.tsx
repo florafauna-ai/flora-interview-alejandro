@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import './App.css';
 
 type AspectRatio = {
@@ -29,6 +31,40 @@ const aspectRatios: AspectRatio[] = [
   { label: '3:2 (Photo)', value: "3/2" },
   { label: '21:9 (Ultrawide)', value: 2.33 },
 ];
+
+// Component that will be rendered inside the 3D scene
+const ResizableDiv = ({ dimensions, onDrag }: { 
+  dimensions: { width: number; height: number }; 
+  onDrag: (e: React.MouseEvent) => void;
+}) => {
+  return (
+    <Html
+      center
+      style={{
+        width: `${dimensions.width}px`,
+        height: `${dimensions.height}px`,
+        position: 'relative',
+      }}
+    >
+      <div 
+        className="blue-div"
+        style={{
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url(/town-illustration.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div 
+          className="resize-handle"
+          onMouseDown={onDrag}
+        />
+      </div>
+    </Html>
+  );
+};
 
 function App() {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>(aspectRatios[0]);
@@ -86,7 +122,7 @@ function App() {
 
   return (
     <div className="App">
-      <div className="controls">
+      <div className="controls" style={{ position: 'absolute', zIndex: 1000, }}>
         <label htmlFor="aspectRatio">Aspect Ratio:</label>
         <select 
           id="aspectRatio"
@@ -101,19 +137,22 @@ function App() {
         </select>
       </div>
       
-      <div className="container">
-        <div 
-          className="blue-div"
-          style={{
-            width: `${dimensions.width}px`,
-            height: `${dimensions.height}px`,
+      <div className="container" style={{ width: '100%', height: '80vh' }}>
+        <Canvas
+          orthographic
+          camera={{
+            zoom: 1,
+            position: [0, 0, 1000],
+            near: 0.1,
+            far: 2000,
           }}
+          style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
         >
-          <div 
-            className="resize-handle"
-            onMouseDown={handleDrag}
+          <ResizableDiv 
+            dimensions={dimensions} 
+            onDrag={handleDrag}
           />
-        </div>
+        </Canvas>
       </div>
     </div>
   );
