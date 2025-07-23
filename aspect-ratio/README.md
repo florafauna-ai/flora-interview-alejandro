@@ -1,5 +1,9 @@
 Hi! Welcome to your technical coding exam.
 
+Some ground rules:
+- You're welcome to use any tools - but no LLMs. Search, docs, etc are all fine.
+- You can use the structure setup for you, or not. Feel free to scrap shell functions if you see fit.
+
 You're presented with a dropdown with some aspect ratios and a React Three Fiber canvas with a div inside. Your job is to:
 
 1. Make the div respond to the aspect ratios of the dropdown.
