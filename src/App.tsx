@@ -9,12 +9,13 @@ type AspectRatio = {
 };
 
 const aspectRatios: AspectRatio[] = [
-  { label: "1:1 (Square)", value: "1" },
+  { label: "1:1 (Square)", value: "1" }, //1
   { label: "16:9 (Widescreen)", value: 1.77 },
-  { label: "4:3 (Standard)", value: "4:3" },
-  { label: "3:2 (Photo)", value: "3/2" },
+  { label: "4:3 (Standard)", value: "4:3" }, //1.33
+  { label: "3:2 (Photo)", value: "3/2" }, //1,5
   { label: "21:9 (Ultrawide)", value: 2.33 },
 ];
+
 
 // Component that will be rendered inside the 3D scene
 const ResizableDiv = ({
@@ -56,7 +57,15 @@ function App() {
   );
   const [dimensions, setDimensions] = useState({ width: 300, height: 300 });
 
-  const handleRatioChange = (event: React.ChangeEvent<HTMLSelectElement>) => {};
+  const handleRatioChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    // handle drag - no override with shift
+    // get value and search on the aspecratios enum
+    const selectedAspectRatio = event.currentTarget.value;
+    aspectRatios.forEach((aspectRatio) => {
+      if (aspectRatio.value == selectedAspectRatio)
+        setSelectedRatio(aspectRatio)
+    })
+  };
 
   const handleDrag = useCallback(
     (e: React.MouseEvent) => {},
